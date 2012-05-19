@@ -34,6 +34,26 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh33.tar.gz">2.3.2-kh33 </a> <br/>
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh33_setup.exe">2.3.2-kh33 (win32) </a> <br/>
+    <p>19/05/2012</p>
+    <ul>
+    <li>Expand file open limit to match &lt;clients&gt; if possible, warn if less.
+    <li>Fix possible client leak. legacy code removal.
+    <li>updated mpeg parser to be more specific on bits to match for. It should increase
+    the tolerance for changes in the stream format (CRC, samplerate etc).
+    <li>reload forces an update of active streams, was missing from a previous update.
+    <li>Realplayer based apps fix for aac+. Assumes certain response header.
+    <li>drop requirement for matching each / in mount-name.
+    <li>content type needed truncating in rare cases before format could be set up
+    <li>prevent too much being read in one go when reading ogg data.
+    <li>internal change to swapping of hijacked clients, possible crash fix.
+    <li>fallback over multiple mounts works again 
+    <li>Add timeout for sync mode handling. Should never trigger really.
+    <li>a few small log reporting changes.
+    </ul>
+    <br/>
+
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh32.tar.gz">2.3.2-kh32 </a> <br/>
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh32_setup.exe">2.3.2-kh32 (win32) </a> <br/>
     <p>17/04/2012</p>
