@@ -34,6 +34,34 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh1.tar.gz">2.3.3-kh1 </a> <br/>
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh1_setup.exe">2.3.3-kh1 (win32) </a> <br/>
+    <p>24/06/2012</p>
+    <ul>
+    <li>Big change with rwlocks replacing mutexes. It's internal but can have a big effect
+    on load pattern usage. In cases with many listeners on a single mount we can now
+    spread clients across all workers. A number of balancing changes were done to
+    assist in localising related clients but may need more tweaking.  A side effect
+    of these changes is that queues are only shrunk when there are no listeners, so
+    queues can take up more memory than usual but that could of happened before.</li>
+    <li>fix bad reference for file-based content like intro/fallback with FLV</li>
+    <li>make the minimum duration of an on-demand relay last until it would be classed as
+    working, any less then it could be skipped or disabled for a short time.</li>
+    <li>skip entity decoding if none required.  For cases where metadata has &amp; causing
+    the libxml2 to spit out warnings like "no name".</li>
+    <li>If no sockets are opened at the start then exit.</li>
+    <li>Win32. standardize on format for date, back to proper timezone numbers</li>
+    <li>Log AAC samplerate change in stream.</li>
+    <li>Add &lt;inactivity-timeout&gt; in &lt;limits&gt; to stop icecast when there are no sources</li>
+    <li>Add &lt;x-forwarded-for&gt; into &lt;paths&gt; for IP substitution from load balancers</li>
+    <li>Added referer= to listener_add POST.</li>
+    <li>Added sent= to listener_remove POST (bytes)</li>
+    <li>sync ebml/webm format parser with 2.3.3, not tried it myself.</li>
+    <li>minor tweaks for rescheduling on high bitrate streams, terminating sources, URL
+    auth handling if disabled and busy relay restarting.</li>
+    </ul>
+    <br/>
+
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh33.tar.gz">2.3.2-kh33 </a> <br/>
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.2-kh33_setup.exe">2.3.2-kh33 (win32) </a> <br/>
     <p>19/05/2012</p>
