@@ -34,6 +34,22 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh2.tar.gz">2.3.3-kh2 </a> <br/>
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh2_setup.exe">2.3.3-kh2 (win32) </a> <br/>
+    <p>15/07/2012</p>
+    <ul>
+        <li>sent value passed to listener_remove in kh1 could be wrong on 32bit setups</li>
+        <li>avoid clearing queue on relay restart, it exposed a crash case with lock changes</li>
+        <li>make TCP sockets not pass to on-[dis]connect scripts. useless work avoided</li>
+        <li>hijack source fix required with lock changes, to avoid mis-calculated lags drops</li>
+        <li>refcount bug missed for sending to master relays. possible memory corruption</li>
+        <li>more worker balancing changes, to spread loading more evenly.</li>
+        <li>missing delay for blocking file client, has an effect of higher cpu usage</li>
+        <li>rare override failure case handled better.</li>
+        <li>various minor fixes, including log format, memory leak and stats.</li>
+    </ul>
+    <br/>
+
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh1.tar.gz">2.3.3-kh1 </a> <br/>
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh1_setup.exe">2.3.3-kh1 (win32) </a> <br/>
     <p>24/06/2012</p>
