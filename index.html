@@ -34,6 +34,32 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh4.tar.gz">2.3.3-kh4 </a> <br/>
+    <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh4_setup.exe">2.3.3-kh4 (win32) </a> <br/>
+    <p>09/09/2012</p>
+    <ul>
+    <li>burst size of less than 1400 was not handled correctly with recent rwlock changes</li>
+    <li>some memory reduction for FLV listeners.</li>
+    <li>Missing xsl could cause a busy loop.</li>
+    <li>fixed a crash when listener reached end of the queue. Certain assumptions about buffer
+    of queue accounting were changed with rwlocks, exposed a crash case.</li>
+    <li>on some multi-processor setups, it was possible that certain listeners could trigger
+    a busy worker due to old (cached?) data, work around applied.</li>
+    <li>A listener that started off a new on-demand relay could be only partially initialised
+    a lead to a crash later on</li>
+    <li>report of recent flash update on FF15 when requesting non-FLV content. Expected header
+    identifying flash is no longer present so now we check for swf in referer.</li>
+    <li>Add short write handler for clients requesting short ranges (eg Apple)</li>
+    <li>The stats handle for normal file or fallback files were altered in a previous release
+    which prevented a lookup of listener details via admin requests. now fixed.</li>
+    <li>only move inactive relay client to another worker when there is sufficient difference</li>
+    <li>honor auth options "allow_duplicate_users" and "drop_existing_listener" settings for webroot files</li>
+    <li>proxy cache avoidance headers more generally used.</li>
+    <li>minor memory leak on moving clients over fallback.</li>
+    <li>code cleanup</li>
+    </ul>
+    <br/>
+
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh3.tar.gz">2.3.3-kh3 </a> <br/>
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh3_setup.exe">2.3.3-kh3 (win32) </a> <br/>
     <p>07/08/2012</p>
