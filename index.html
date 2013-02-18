@@ -34,6 +34,25 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh6.tar.gz">2.3.3-kh6</a> <br/>
+    <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh6.exe/download">2.3.3-kh6 (win32) </a> <br/>
+    <p>18/02/2013</p>
+    <ul>
+      <li>update response header code for returning 200/206. On streams, do not send 206, but allow it for file requests.</li>
+      <li>migrate some legacy source stats calls to newer API, reduces workload.</li>
+      <li>fix some corner cases for queue handling.</li>
+      <li>tweaks for response headers for iphone and blackberry</li>
+      <li>fix for some cases where listener_remove is not triggered.</li>
+      <li>fix for override fallback file through cascade. </li>
+      <li>do not use spin locks on BSD for now, use mutexes.</li>
+      <li>mpeg parsing for processing files handled better now.</li>
+      <li>fix for handling privileged ports over reload.</li>
+      <li>fix for SOCK_CLOEXEC on linux where it is not implemented</li>
+      <li>allow for multiple args to be supplied to on-[dis]connect scripts.</li>
+      <li>various performance tunings all over, along with a few race fixes and memory leaks</li>
+    </ul>
+    <br/>
+
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh5.tar.gz">2.3.3-kh5</a> <br/>
     <a href="https://github.com/downloads/karlheyes/icecast-kh/icecast-2.3.3-kh5_setup.exe">2.3.3-kh5 (win32) </a> <br/>
     <p>12/09/2012</p>
