@@ -34,6 +34,29 @@
     Latest development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh7.tar.gz">2.3.3-kh7</a> <br/>
+    <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh7_setup.exe/download">2.3.3-kh7 (win32) </a> <br/>
+    <p>24/04/2013</p>
+    <ul>
+      <li>processing certain mpeg intro file could lead to a listener disconnection.</li>
+      <li>initialise mpeg resync count on first frame found, prevents looping fallback files
+          with ID3 or other content from dropping listener after so many times.</li>
+      <li>fix relays not overriding listeners from a fallback when starting up.</li>
+      <li>prevent the (n appearing in metadata for mp3/aac streams.</li>
+      <li>allow for source queue shrinkage. With the rwlock merging, the queues were left to expand to
+          queue-size whether listeners were lagging or not, this helps reduce unwanted parts of the queue.</li>
+      <li>Avoid listener remove event if source client passes auth but is rejected due to the
+          source being in use</li>
+      <li>introduce lazy slave stats update for updating virtual mountpoints, this reduces 
+          the stats generated if you have many mountpoints with frequent starts and stops.</li>
+      <li>drop PE substitution in metadata, only do the likes of &amp;</li>
+      <li>allow for listener processing to be skipped if it would stall waiting on lock.</li>
+      <li>stats link update, like issuiing NEW commands first at connection before EVENT, not
+          important for most people</li>
+      <li>Various log message updates and small scale lock range updates.</li>
+    </ul>
+    <br/>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh6.tar.gz">2.3.3-kh6</a> <br/>
     <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh6_install.exe/download">2.3.3-kh6 (win32) </a> <br/>
     <p>18/02/2013</p>
