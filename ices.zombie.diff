@@ -1,0 +1,27 @@
+Index: src/stream.c
+===================================================================
+--- src/stream.c	(revision 15420)
++++ src/stream.c	(working copy)
+@@ -295,7 +295,7 @@
+         }
+       }
+     }
+-    ices_cue_update (source);
++    //ices_cue_update (source);
+   }
+ 
+ #ifdef HAVE_LIBLAME
+Index: src/signals.c
+===================================================================
+--- src/signals.c	(revision 15420)
++++ src/signals.c	(working copy)
+@@ -85,7 +85,8 @@
+ {
+   int stat;
+ 
+-  wait (&stat);
++  while (waitpid (-1, &stat, 0) > 0)
++      ;
+ }
+ 
+ /* SIGINT, ok, let's be nice and just drop dead */
