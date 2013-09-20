@@ -1,0 +1,65 @@
+Index: src/mp3.c
+===================================================================
+--- src/mp3.c	(revision 15420)
++++ src/mp3.c	(working copy)
+@@ -17,7 +17,7 @@
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+  *
+- * $Id: mp3.c,v 1.35 2003/07/06 18:26:47 brendan Exp $
++ * $Id$
+  */
+ 
+ #include "definitions.h"
+@@ -26,7 +26,7 @@
+ 
+ #define MPG_MD_MONO 3
+ 
+-#define MP3_BUFFER_SIZE 4096
++#define MP3_BUFFER_SIZE 1500
+ 
+ typedef struct {
+   unsigned int version;
+@@ -273,12 +273,13 @@
+   } else {
+     /* we don't just use EOF because we'd like to avoid the ID3 tag */
+     if (self->filesize && self->filesize - self->bytes_read < len)
+-      len = self->filesize - self->bytes_read;
++      rlen = self->filesize - self->bytes_read;
+     if (len)
+       rlen = read (self->fd, buf, len);
+   }
+ 
+-  self->bytes_read += rlen;
++  if (rlen > 0)
++      self->bytes_read += rlen;
+ 
+   return rlen;
+ }
+Index: src/stream.c
+===================================================================
+--- src/stream.c	(revision 15420)
++++ src/stream.c	(working copy)
+@@ -295,7 +295,7 @@
+         }
+       }
+     }
+-    ices_cue_update (source);
++    //ices_cue_update (source);
+   }
+ 
+ #ifdef HAVE_LIBLAME
+Index: src/signals.c
+===================================================================
+--- src/signals.c	(revision 15420)
++++ src/signals.c	(working copy)
+@@ -85,7 +85,8 @@
+ {
+   int stat;
+ 
+-  wait (&stat);
++  while (waitpid (-1, &stat, 0) > 0)
++      ;
+ }
+ 
+ /* SIGINT, ok, let's be nice and just drop dead */
