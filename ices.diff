@@ -56,7 +56,7 @@ Index: src/mp3.c
  
    if (mp3_data->buf) {
      remaining = mp3_data->len - mp3_data->pos;
-@@ -278,7 +278,8 @@
+@@ -278,9 +278,10 @@
        rlen = read (self->fd, buf, len);
    }
  
@@ -64,5 +64,8 @@ Index: src/mp3.c
 +  if (rlen > 0)
 +      self->bytes_read += rlen;
  
-   return rlen;
+-  return rlen;
++  return rlen == 0 ? -1 : rlen;
  }
+ 
+ #ifdef HAVE_LIBLAME
