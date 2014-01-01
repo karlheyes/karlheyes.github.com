@@ -1,13 +1,16 @@
 diff -u src/mp3.c src.new/mp3.c
 --- src/mp3.c	2009-08-08 22:04:06.000000000 +0100
-+++ src.new/mp3.c	2013-09-20 22:29:22.772755438 +0100
-@@ -267,12 +267,13 @@
- 	} else {
- 		/* we don't just use EOF because we'd like to avoid the ID3 tag */
- 		if (self->filesize && self->filesize - self->bytes_read < len)
--			len = self->filesize - self->bytes_read;
-+			rlen = self->filesize - self->bytes_read;
- 		if (len)
++++ src.new/mp3.c	2014-01-01 13:48:40.178160888 +0000
+@@ -26,7 +26,7 @@
+ 
+ #define MPG_MD_MONO 3
+ 
+-#define MP3_BUFFER_SIZE 4096
++#define MP3_BUFFER_SIZE 1500
+ 
+ typedef struct {
+ 	unsigned int version;
+@@ -272,9 +272,10 @@
  			rlen = read(self->fd, buf, len);
  	}
  
@@ -15,30 +18,33 @@ diff -u src/mp3.c src.new/mp3.c
 +        if (rlen > 0)
 +            self->bytes_read += rlen;
  
- 	return rlen;
+-	return rlen;
++	return rlen == 0 ? -1 : rlen;
  }
-Common subdirectories: src/playlist and src.new/playlist
+ 
+ #ifdef HAVE_LIBLAME
 diff -u src/signals.c src.new/signals.c
 --- src/signals.c	2009-08-06 21:00:27.000000000 +0100
-+++ src.new/signals.c	2013-09-20 22:30:23.181341124 +0100
-@@ -81,7 +81,7 @@
++++ src.new/signals.c	2014-01-01 13:48:00.601483613 +0000
+@@ -81,7 +81,8 @@
  static RETSIGTYPE signals_child(const int sig) {
  	int stat;
  
 -	wait(&stat);
-+	while (waitpid (-1, &stat, 0) > 0);
++	while (waitpid (-1, &stat, 0) > 0)
++           ;
  }
  
  /* SIGINT, ok, let's be nice and just drop dead */
 diff -u src/stream.c src.new/stream.c
 --- src/stream.c	2009-08-08 21:56:38.000000000 +0100
-+++ src.new/stream.c	2013-09-20 22:29:44.935603457 +0100
++++ src.new/stream.c	2014-01-01 13:49:17.098859698 +0000
 @@ -294,7 +294,7 @@
  				}
  			}
  		}
 -		ices_cue_update(source);
-+		//ices_cue_update(source);
++		// ices_cue_update(source);
  		if ( source->interrupttime && time(NULL)>=source->interrupttime ) finish_send = 1;
  	}
  
