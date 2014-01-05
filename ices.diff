@@ -1,3 +1,16 @@
+Index: src/id3.c
+===================================================================
+--- src/id3.c	(revision 15420)
++++ src/id3.c	(working copy)
+@@ -244,7 +244,7 @@
+     }
+     len2 = len;
+     while (len2) {
+-      if ((rlen = source->read (source, buf, len)) < 0) {
++      if ((rlen = source->read (source, buf, len)) <= 0) {
+         ices_log ("Error reading ID3v2 frame data");
+         free (buf);
+       
 Index: src/stream.c
 ===================================================================
 --- src/stream.c	(revision 15420)
@@ -11,20 +24,6 @@ Index: src/stream.c
    }
  
  #ifdef HAVE_LIBLAME
-Index: src/signals.c
-===================================================================
---- src/signals.c	(revision 15420)
-+++ src/signals.c	(working copy)
-@@ -85,7 +85,8 @@
- {
-   int stat;
- 
--  wait (&stat);
-+  while (waitpid (-1, &stat, 0) > 0)
-+      ;
- }
- 
- /* SIGINT, ok, let's be nice and just drop dead */
 Index: src/mp3.c
 ===================================================================
 --- src/mp3.c	(revision 15420)
@@ -47,16 +46,7 @@ Index: src/mp3.c
  
  typedef struct {
    unsigned int version;
-@@ -256,7 +256,7 @@
- {
-   ices_mp3_in_t* mp3_data = self->data;
-   int remaining;
--  int rlen = 0;
-+  int rlen = -1;
- 
-   if (mp3_data->buf) {
-     remaining = mp3_data->len - mp3_data->pos;
-@@ -278,9 +278,10 @@
+@@ -278,7 +278,8 @@
        rlen = read (self->fd, buf, len);
    }
  
@@ -64,8 +54,19 @@ Index: src/mp3.c
 +  if (rlen > 0)
 +      self->bytes_read += rlen;
  
--  return rlen;
-+  return rlen == 0 ? -1 : rlen;
+   return rlen;
+ }
+Index: src/signals.c
+===================================================================
+--- src/signals.c	(revision 15420)
++++ src/signals.c	(working copy)
+@@ -85,7 +85,8 @@
+ {
+   int stat;
+ 
+-  wait (&stat);
++  while (waitpid (-1, &stat, 0) > 0)
++      ;
  }
  
- #ifdef HAVE_LIBLAME
+ /* SIGINT, ok, let's be nice and just drop dead */
