@@ -1,6 +1,18 @@
+diff -u src/id3.c src.new/id3.c
+--- src/id3.c	2009-08-08 22:01:51.000000000 +0100
++++ src.new/id3.c	2014-01-05 00:26:51.629524324 +0000
+@@ -238,7 +238,7 @@
+ 		}
+ 		len2 = len;
+ 		while (len2) {
+-			if ((rlen = source->read(source, buf, len)) < 0) {
++			if ((rlen = source->read(source, buf, len)) <= 0) {
+ 				ices_log("Error reading ID3v2 frame data");
+ 				free(buf);
+ 
 diff -u src/mp3.c src.new/mp3.c
 --- src/mp3.c	2009-08-08 22:04:06.000000000 +0100
-+++ src.new/mp3.c	2014-01-01 13:48:40.178160888 +0000
++++ src.new/mp3.c	2014-01-05 00:27:56.036181399 +0000
 @@ -26,7 +26,7 @@
  
  #define MPG_MD_MONO 3
@@ -10,7 +22,7 @@ diff -u src/mp3.c src.new/mp3.c
  
  typedef struct {
  	unsigned int version;
-@@ -272,9 +272,10 @@
+@@ -272,7 +272,8 @@
  			rlen = read(self->fd, buf, len);
  	}
  
@@ -18,33 +30,30 @@ diff -u src/mp3.c src.new/mp3.c
 +        if (rlen > 0)
 +            self->bytes_read += rlen;
  
--	return rlen;
-+	return rlen == 0 ? -1 : rlen;
+ 	return rlen;
  }
- 
- #ifdef HAVE_LIBLAME
+Common subdirectories: src/playlist and src.new/playlist
 diff -u src/signals.c src.new/signals.c
 --- src/signals.c	2009-08-06 21:00:27.000000000 +0100
-+++ src.new/signals.c	2014-01-01 13:48:00.601483613 +0000
-@@ -81,7 +81,8 @@
++++ src.new/signals.c	2013-09-20 22:30:23.181341124 +0100
+@@ -81,7 +81,7 @@
  static RETSIGTYPE signals_child(const int sig) {
  	int stat;
  
 -	wait(&stat);
-+	while (waitpid (-1, &stat, 0) > 0)
-+           ;
++	while (waitpid (-1, &stat, 0) > 0);
  }
  
  /* SIGINT, ok, let's be nice and just drop dead */
 diff -u src/stream.c src.new/stream.c
 --- src/stream.c	2009-08-08 21:56:38.000000000 +0100
-+++ src.new/stream.c	2014-01-01 13:49:17.098859698 +0000
++++ src.new/stream.c	2013-09-20 22:29:44.935603457 +0100
 @@ -294,7 +294,7 @@
  				}
  			}
  		}
 -		ices_cue_update(source);
-+		// ices_cue_update(source);
++		//ices_cue_update(source);
  		if ( source->interrupttime && time(NULL)>=source->interrupttime ) finish_send = 1;
  	}
  
