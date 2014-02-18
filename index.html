@@ -34,6 +34,32 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh10.tar.gz">2.3.3-kh10</a> <br/>
+    <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh10_setup.exe/download">2.3.3-kh10 (win32) </a> <br/>
+    <p>18/02/2014</p>
+    <ul>
+        <li>xslt update race fix
+        <li>Format.
+            mpeg parsing can be bypassed if mpeg4 is detected.
+            mpeg assumed by default even application/octet for streams only.
+            EBML streaming working again.
+            Ogg handler was getting stuck with large pages, typically intro via libcurl.
+        <li>Auth.
+            Fix up intro content from auth.
+            Presume innocent setting was being ignore if the queue was full.
+            Added referer to auth command
+        <li>Relay updates.
+            uses single structure for all relays, with timestamps. makes better
+            handling of startup, shutdown and changes to relays.
+            A redirect response handled better, if user/pass returned.
+            Queue cleanup on inactive relay, reduce memory use in such cases.
+        <li>issue CORS headers, just wildcard for now.
+        <li>yp race fixed, make sure yp_currently_playing is not dependent on YP add completing
+        <li>stats client bug on initial stats dump fixed
+        <li>various internal setting tweaks to trigger events or limit actions.
+        <li>various lockup and crash cases fixed.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh9.tar.gz">2.3.3-kh9</a> <br/>
     <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh9_setup.exe/download">2.3.3-kh9 (win32) </a> <br/>
     <p>16/08/2013</p>
