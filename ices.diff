@@ -1,32 +1,38 @@
 Index: src/id3.c
 ===================================================================
---- src/id3.c	(revision 15420)
+--- src/id3.c	(revision 19189)
 +++ src/id3.c	(working copy)
-@@ -244,7 +244,7 @@
+@@ -237,7 +237,8 @@
+ 
+   /* ices_log_debug("ID3v2: Frame type [%s] found, %d bytes", hdr, len); */
+   if (!strcmp (hdr, ID3V2_ARTIST_TAG(tag)) || !strcmp (hdr, ID3V2_TITLE_TAG(tag))) {
+-    if (! (buf = malloc(len+1))) {
++    char *b;
++    if (! (b = buf = malloc(len+1))) {
+       ices_log ("Error allocating memory while reading ID3v2 frame");
+       
+       return -1;
+@@ -244,14 +245,15 @@
      }
      len2 = len;
      while (len2) {
 -      if ((rlen = source->read (source, buf, len)) < 0) {
-+      if ((rlen = source->read (source, buf, len)) <= 0) {
++      if ((rlen = source->read (source, b, len2)) <= 0) {
          ices_log ("Error reading ID3v2 frame data");
          free (buf);
-       
-Index: src/stream.c
-===================================================================
---- src/stream.c	(revision 15420)
-+++ src/stream.c	(working copy)
-@@ -295,7 +295,7 @@
-         }
+-      
++
+         return -1;
        }
+       tag->pos += rlen;
+       len2 -= rlen;
++      b += rlen;
      }
--    ices_cue_update (source);
-+    //ices_cue_update (source);
-   }
  
- #ifdef HAVE_LIBLAME
+     /* skip encoding */
 Index: src/mp3.c
 ===================================================================
---- src/mp3.c	(revision 15420)
+--- src/mp3.c	(revision 19189)
 +++ src/mp3.c	(working copy)
 @@ -17,7 +17,7 @@
   * along with this program; if not, write to the Free Software
@@ -58,7 +64,7 @@ Index: src/mp3.c
  }
 Index: src/signals.c
 ===================================================================
---- src/signals.c	(revision 15420)
+--- src/signals.c	(revision 19189)
 +++ src/signals.c	(working copy)
 @@ -85,7 +85,8 @@
  {
@@ -70,3 +76,16 @@ Index: src/signals.c
  }
  
  /* SIGINT, ok, let's be nice and just drop dead */
+Index: src/stream.c
+===================================================================
+--- src/stream.c	(revision 19189)
++++ src/stream.c	(working copy)
+@@ -295,7 +295,7 @@
+         }
+       }
+     }
+-    ices_cue_update (source);
++    //ices_cue_update (source);
+   }
+ 
+ #ifdef HAVE_LIBLAME
