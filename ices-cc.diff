@@ -1,18 +1,33 @@
-diff -u src/id3.c src.new/id3.c
---- src/id3.c	2009-08-08 22:01:51.000000000 +0100
-+++ src.new/id3.c	2014-01-05 00:26:51.629524324 +0000
-@@ -238,7 +238,7 @@
+--- src/id3.c	2014-08-17 21:07:29.838452562 +0100
++++ src.new/id3.c	2014-08-17 21:14:30.576142138 +0100
+@@ -231,14 +231,15 @@
+ 
+ 	/* ices_log_debug("ID3v2: Frame type [%s] found, %d bytes", hdr, len); */
+ 	if (!strcmp(hdr, ID3V2_ARTIST_TAG(tag)) || !strcmp(hdr, ID3V2_TITLE_TAG(tag))) {
+-		if (!(buf = malloc(len + 1))) {
++        char *b;
++		if (!(b = buf = malloc(len + 1))) {
+ 			ices_log("Error allocating memory while reading ID3v2 frame");
+ 
+ 			return -1;
  		}
  		len2 = len;
  		while (len2) {
 -			if ((rlen = source->read(source, buf, len)) < 0) {
-+			if ((rlen = source->read(source, buf, len)) <= 0) {
++			if ((rlen = source->read(source, b, len2)) <= 0) {
  				ices_log("Error reading ID3v2 frame data");
  				free(buf);
  
-diff -u src/mp3.c src.new/mp3.c
---- src/mp3.c	2009-08-08 22:04:06.000000000 +0100
-+++ src.new/mp3.c	2014-01-05 00:27:56.036181399 +0000
+@@ -246,6 +247,7 @@
+ 			}
+ 			tag->pos += rlen;
+ 			len2 -= rlen;
++            b += rlen;
+ 		}
+ 
+ 		/* do basic unicode->ascii conversion */
+--- src/mp3.c	2014-08-17 21:07:29.869452392 +0100
++++ src.new/mp3.c	2014-08-17 21:07:29.677453446 +0100
 @@ -26,7 +26,7 @@
  
  #define MPG_MD_MONO 3
@@ -32,10 +47,8 @@ diff -u src/mp3.c src.new/mp3.c
  
  	return rlen;
  }
-Common subdirectories: src/playlist and src.new/playlist
-diff -u src/signals.c src.new/signals.c
---- src/signals.c	2009-08-06 21:00:27.000000000 +0100
-+++ src.new/signals.c	2013-09-20 22:30:23.181341124 +0100
+--- src/signals.c	2014-08-17 21:07:29.810452716 +0100
++++ src.new/signals.c	2014-08-17 21:07:29.606453836 +0100
 @@ -81,7 +81,7 @@
  static RETSIGTYPE signals_child(const int sig) {
  	int stat;
@@ -45,9 +58,8 @@ diff -u src/signals.c src.new/signals.c
  }
  
  /* SIGINT, ok, let's be nice and just drop dead */
-diff -u src/stream.c src.new/stream.c
---- src/stream.c	2009-08-08 21:56:38.000000000 +0100
-+++ src.new/stream.c	2013-09-20 22:29:44.935603457 +0100
+--- src/stream.c	2014-08-17 21:07:29.887452293 +0100
++++ src.new/stream.c	2014-08-17 21:07:29.678453441 +0100
 @@ -294,7 +294,7 @@
  				}
  			}
