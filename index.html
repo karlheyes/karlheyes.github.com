@@ -23,9 +23,10 @@
     <img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
     </form>
 
-    <p>This is the current set of branches of ices2 and icecast2. They extend on the offical
-    release (currently 2.3.3) with features that may be (if found to be working out well) merged
-    into the next offical release.  You can contact me karl &lt;at&gt; kheyes.plus.com</p>
+    <p>This is the current set of branches of ices2 and icecast2. They are based on the Xiph offical
+    release with features based on feedback from people. Some of these features are not suitable for
+    distribution from Xiph, like the FLV wrapping/mpeg parsing, others are more suited for large scale
+    installations.  You can contact me karl &lt;at&gt; kheyes.plus.com</p>
 
     <br/>
 
@@ -33,6 +34,35 @@
     ices0 patch for avoiding cue file and zombie process creation, often seen on centovacast setups <a href="ices.zombie.diff">Here</a><br />
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
+
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh1.tar.gz">2.4.0-kh1</a> <br/>
+    <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh1_setup.exe/download">2.4.0-kh1 (win32) </a> <br/>
+    <p>04/05/2015</p>
+    <ul>
+    <li>fix for the 'Detected an entity reference loop' message</li>
+    <li>header parsing in auth url updated to handle spacing better</li>
+    <li>preload default mime types then try to load the mime types file</li>
+    <li>fix ssl routines to handle stalls better</li>
+    <li>fix issue raised by Klaas Jan, handle blank usernames and encode them to keep the validity of the CLF format.</li>
+    <li>cleanup xslt cache/reader processing.</li>
+    <li>make PUT the same as SOURCE, handle 100 Continue header</li>
+    <li>allow type=.fla as a trigger for FLV wrapping</li>
+    <li>user the real/effective/saved user/group calls if available</li>
+    <li>prevent worker pipes being passed to exec'd processes, and force FD 0 1 2 to close</li>
+    <li>fix header line Content-Disposition</li>
+    <li>avoid possible race case in relay removal.</li>
+    <li>for ogg feeds, make sure a new block is allocated at the start, else bad parsing could occur.</li>
+    <li>use 2.4.x setting for default SSL cipher settings.</li>
+    <li>allow for moving a lagging listener to the front of the queue</li>
+    <li>send a CORS template for both HEAD and OPTIONS requests, HEAD needs expanding though</li>
+    <li>open up the write throttle for unparsed file content</li>
+    <li>use original mountpoint in listener disconnection for auth/accesslog selection</li>
+    <li>Apply x-forwarded-for to source clients</li>
+    <li>treat some failure cases correctly if auth presume innocent setting is in use</li>
+    <li>add YP sanity checks for obviously incorrect cases</li>
+    <li>various log message cleanups.</li>
+    <li>various crash cases fixed.</li>
+    </ul>
 
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.3.3-kh11.tar.gz">2.3.3-kh11</a> <br/>
     <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.3.3-kh11.1_setup.exe/download">2.3.3-kh11 (win32) </a> <br/>
