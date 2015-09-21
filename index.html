@@ -35,6 +35,31 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh2.tar.gz">2.4.0-kh2</a> <br/>
+    <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh2_setup.exe/download">2.4.0-kh2 (win32) </a> <br/>
+    <p>21/09/2015</p>
+    <ul>
+    <li>possible global listener count error fixed
+    <li>possible crash with FLV and fallback handling fixed
+    <li>FLV throttle fixup when dealing with files
+    <li>fix up case for requeue on lagging client.
+    <li>use throttling thresholds based on bitrate
+    <li>scale non-ogg blocks based on bitrate but still enforce a send limit with an
+    optional &lt;max-send-size&gt; tag. not usually needed
+    <li>implementation of HTTP keep-alive, mainly for web type requests.
+    <li>add &lt;redirect-to&gt; tag in &lt;mount&gt;, similar to &lt;redirect&gt; but allows for expansion
+    such as ${mount}. the redirect tag is just an alias of this now.
+    <li>intro file sending had no burst calculations.
+    <li>allow for auth bypass in certain very limited cases, like small range requests used
+    by certain clients, or HEAD requests.
+    <li>HTTP header cleanups depending on the request, content length etc
+    <li>allow for byte accurate drop, this is for range requests for some clients.
+    <li>shutdown cleanups, to avoid stalls.
+    <li>tidy up xml page error reporting.
+    <li>build updates
+    </ul>
+
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh1.tar.gz">2.4.0-kh1</a> <br/>
     <a href="http://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh1_setup.exe/download">2.4.0-kh1 (win32) </a> <br/>
     <p>04/05/2015</p>
