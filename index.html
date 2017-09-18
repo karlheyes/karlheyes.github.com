@@ -35,6 +35,30 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh6.tar.gz">2.4.0-kh6</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh6_win32_setup.exe/download">2.4.0-kh6 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh6_win64_setup.exe/download">2.4.0-kh6 (win64) </a> <br/>
+    <p>18/9/2017</p>
+    <ul>
+    <li>drop client is read channel is closed off, handles proxies better like AWS.
+    <li>Logging
+    <ul>
+    <li>better log messaging at startup if change owner used.
+    <li>fixed race bug generally affecting the per-mount logs, excessive purging.
+    <li>fix auto log cyclying
+    </ul>
+    <li>Add listeners= to POST on auth url. current listener count in the stats
+    <li>internal improvement to cached entries for addresses
+    <li>SSL updates
+    <ul>
+    <li>build fix where no SSL is available
+    <li>allow for DH/ECDH
+    <li>allow for reading the cert before dropping privs, but keep certificate if reload is fails.
+    <li>crash fix if no SSL certificate defined.
+    <li>small fix for internal openssl threading.
+    </ul>
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh5.tar.gz">2.4.0-kh5</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh5_win32_setup.exe/download">2.4.0-kh5 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh5_win64_setup.exe/download">2.4.0-kh5 (win64) </a> <br/>
