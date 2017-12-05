@@ -35,6 +35,41 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh8.tar.gz">2.4.0-kh8</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh8_win32_setup.exe/download">2.4.0-kh8 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh8_win64_setup.exe/download">2.4.0-kh8 (win64) </a> <br/>
+    <p>5/12/2017</p>
+    <ul>
+    <li>Logging. An issue was reported on log cycling triggers, should be the last now. This time it
+    seems to stem from a cycle triggered externally where a new log is created for appending before
+    doing the reopen.  This is now fixed.
+
+    <li>Expand the worker limiter when processing lots of clients in one pass. This was leading to
+    some seeing sources not getting cleaned up as the listeners were not getting serviced.  There
+    is still a cap but is extermely large and can be bypassed on cleanup cases.
+
+    <li>Incoming worker thread added. Normally incoming clients, after passing the initial IP checks
+    get passed on to worker threads for subsequent pocessing.   This can lead to a lot of wakeups
+    for the usual worker threads to process these especially if they are short (eg playlist) or
+    involve filtering or kicking off auth. The extreme case being a DoS type of thing, where the
+    wakeup often causes the worker to do a big list traversal slowing things down as it gets busy.
+    This new worker thread deals with the initial aspects, http parsing, initial request handling
+    and is only moved to the normal workers for sources, listeners and some static content.
+
+    <li>Add "headers" and "header_prefix" options onto auth url. To bring into line with the Xiph
+    build.  It is possible that some sites would want to inspect certain headers passed by
+    clients to authenticate. We do not want to pass all of them as that can be large and for such
+    situations, particular headers are limited, the prime example of these is cookies.  To avoid
+    POST tag name clashes with existing established tags passed in aurl auth, these headers are
+    supplied with a prefix, defaulting to "ClientHeader-"
+
+    <li>Stats. A number of global stats are now reported every 10 seconds or the next second if
+    they have changed.  This reduces load on a stats link and can save on logging if you have
+    that level enabled.
+
+    <li>A small set of code cleanups
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh7.tar.gz">2.4.0-kh7</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh7_win32_setup.exe/download">2.4.0-kh7 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh7_win64_setup.exe/download">2.4.0-kh7 (win64) </a> <br/>
