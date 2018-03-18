@@ -35,6 +35,34 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh9.tar.gz">2.4.0-kh9</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh9_win32_setup.exe/download">2.4.0-kh9 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh9_win64_setup.exe/download">2.4.0-kh9 (win64) </a> <br/>
+    <p>18/3/2018</p>
+    <ul>
+    <li>pre-roll logging options. like access log but report client details of intros played. Can be
+    per-mount or global. Also allow for IP recording to prevent intro play if reconnected within
+    N seconds.
+    <li>add tag ssl-cafile to refer to a CA bundle other than the default. This way the cert is not
+    required to include it.
+    <li>allow /admin/metadata to accept param intro or preroll to change the intro file used on a source.
+    <li>split explicit mounts from list into a tree for quick lookup. speeds up updating with many mount
+    definitions.
+    <li>max-listeners setting in limits for server wide limitations.
+    <li>worker balancing updates. avoid a lot of bouncing between workers for sources and allow more
+    listeners to be attracted to their source worker.
+    <li>clean up shutdown procedure for race handling.
+    <li>smaller SSL handling cleanup.
+    <li>log messaging update.
+    <li>mpeg parsing updates. Allows for better detection and reporting, identifies mismatches better,
+    and detects a few more frame types. The sync structure is also reduced so should help in caching.
+    <li>rate averaging update.
+    <li>minor tuning for intro drops, fix for 0- range requests and intros.
+    <li>delay opening intro file until stream has started up, allows for format matching.
+    <li>lessen write lock scope when reading xml.
+    <li>failing to bind a socket at startup should be a termination event, although not on a reload.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh8.tar.gz">2.4.0-kh8</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh8_win32_setup.exe/download">2.4.0-kh8 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh8_win64_setup.exe/download">2.4.0-kh8 (win64) </a> <br/>
