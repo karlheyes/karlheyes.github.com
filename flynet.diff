@@ -1,0 +1,409 @@
+diff --git a/src/cfgfile.c b/src/cfgfile.c
+index 791e1a1..a3828c9 100644
+--- a/src/cfgfile.c
++++ b/src/cfgfile.c
+@@ -1026,6 +1026,7 @@ static int _parse_mount (xmlNodePtr node, void *arg)
+         { "authentication",     auth_get_authenticator, &mount->auth },
+         { "on-connect",         config_get_str,     &mount->on_connect },
+         { "on-disconnect",      config_get_str,     &mount->on_disconnect },
++        { "source-startup",     config_get_str,     &mount->startup_source },
+         { "max-stream-duration",
+                                 config_get_int,     &mount->max_stream_duration },
+         { "max-listener-duration",
+diff --git a/src/cfgfile.h b/src/cfgfile.h
+index a389382..fdefad7 100644
+--- a/src/cfgfile.h
++++ b/src/cfgfile.h
+@@ -151,6 +151,7 @@ typedef struct _mount_proxy {
+     config_options_t *auth_options; /* Options for this type */
+     char *on_connect;
+     char *on_disconnect;
++    char *startup_source;                   // command to start a source client
+     unsigned int max_stream_duration;
+     unsigned int max_listener_duration;
+ 
+diff --git a/src/global.c b/src/global.c
+index 44934b8..1e5eed5 100644
+--- a/src/global.c
++++ b/src/global.c
+@@ -33,10 +33,12 @@ ice_global_t global;
+ 
+ static mutex_t _global_mutex;
+ 
++
+ void global_initialize(void)
+ {
+     memset (&global, 0, sizeof (global));
+     global.source_tree = avl_tree_new(source_compare_sources, NULL);
++    global.source_startups = avl_tree_new (source_startup_compare, NULL);
+ #ifdef MY_ALLOC
+     global.alloc_tree = avl_tree_new(compare_allocs, NULL);
+ #endif
+@@ -49,7 +51,8 @@ void global_shutdown(void)
+ {
+     thread_rwlock_destroy(&global.workers_rw);
+     thread_mutex_destroy(&_global_mutex);
+-    avl_tree_free(global.source_tree, NULL);
++    avl_tree_free (global.source_tree, NULL);
++    avl_tree_free (global.source_startups, NULL);
+     rate_free (global.out_bitrate);
+     global.out_bitrate = NULL;
+ #ifdef MY_ALLOC
+diff --git a/src/global.h b/src/global.h
+index f7a1dce..8fec395 100644
+--- a/src/global.h
++++ b/src/global.h
+@@ -47,6 +47,7 @@ typedef struct ice_global_tag
+ #endif
+ 
+     avl_tree *relays;
++    avl_tree *source_startups;
+ 
+     /* redirection to slaves */
+     unsigned int redirect_count;
+diff --git a/src/slave.c b/src/slave.c
+index 6c44f6d..650f1f4 100644
+--- a/src/slave.c
++++ b/src/slave.c
+@@ -673,7 +673,9 @@ int relay_has_source (relay_server *relay, client_t *client)
+         thread_rwlock_wlock (&source->lock);
+     else
+     {
++        avl_tree_wlock (global.source_tree);
+         source = source_reserve (relay->localmount, 0);
++        avl_tree_unlock (global.source_tree);
+         if (source == NULL)
+             return 0;
+         relay->source = source;
+@@ -1192,6 +1194,7 @@ static void _slave_thread(void)
+         }
+         stats_global_calc (current.tv_sec);
+         fserve_scan (current.tv_sec);
++        source_scan ();
+ 
+         /* allow for terminating icecast if no streams running */
+         if (inactivity_timer)
+diff --git a/src/source.c b/src/source.c
+index c4caa5d..b45d65e 100644
+--- a/src/source.c
++++ b/src/source.c
+@@ -65,7 +65,8 @@
+ #define MAX_FALLBACK_DEPTH 10
+ 
+ 
+-/* avl tree helper */
++static source_t *source_allocate (const char *mount);
++
+ static void _parse_audio_info (source_t *source, const char *s);
+ static void source_client_release (client_t *client);
+ static int  source_listener_release (source_t *source, client_t *client);
+@@ -129,6 +130,167 @@ struct _client_functions source_client_http_ops =
+ };
+ 
+ 
++
++int source_startup_compare (void *arg, void *a, void *b)
++{
++    struct startup_source *srca = (struct startup_source *)a;
++    struct startup_source *srcb = (struct startup_source *)b;
++
++    return strcmp (srca->mount, srcb->mount);
++}
++
++
++void run_process (const char *mount, mount_proxy *minfo)
++{
++    unsigned int len;
++    char command [4096];
++    len = sizeof command;
++
++    if (util_expand_pattern (mount, minfo->startup_source, command, &len) != 0)
++        return;
++    DEBUG2 ("Starting process for %s : %s", mount, command);
++    pid_t pid, external_pid;
++
++    /* do a fork twice so that the command has init as parent */
++    external_pid = fork();
++    switch (external_pid)
++    {
++        case 0:
++            switch (pid = fork ())
++            {
++                case -1:
++                    ERROR2 ("Unable to fork %s (%s)", command, strerror (errno));
++                    break;
++                case 0:  /* child */
++                    close (0);
++                    close (1);
++                    close (2);
++                    execl ("/bin/sh", "sh", "-c", command, (char *)NULL);
++                    exit(1);
++                default: /* parent */
++                    break;
++            }
++            exit (0);
++        case -1:
++            ERROR1 ("Unable to fork %s", strerror (errno));
++            break;
++        default: /* parent */
++            waitpid (external_pid, NULL, 0);
++            break;
++    }
++}
++
++
++source_t *source_startup_pending (const char *mount, mount_proxy *minfo)
++{
++    if (minfo == NULL || minfo->startup_source == NULL)
++        return NULL;
++
++    struct startup_source lookup, *result = NULL;
++    lookup.mount = (char*)mount;
++    if (avl_get_by_key (global.source_startups, &lookup, (void**)&result) != 0)
++    {
++        result = calloc (1, sizeof (*result));
++        result->mount = strdup (mount);
++        result->timeout = time (NULL) + 10;     // should have a source connection within 10 seconds
++        result->source = source_allocate (mount);
++        avl_insert (global.source_startups, result);
++        run_process (mount, minfo);
++    }
++    thread_rwlock_wlock (&result->source->lock);
++    return result->source;
++}
++
++
++source_t *retrieve_startup_pending (const char *mount)
++{
++    if (global.source_startups->length == 0)
++        return NULL;
++    source_t *src = NULL;
++    struct startup_source lookup, *result = NULL;
++    lookup.mount = (char *)mount;
++    if (avl_get_by_key (global.source_startups, &lookup, (void**)&result) == 0)
++    {
++        // ok, something is pending
++        src = result->source;
++        src->flags |= SOURCE_RESERVED|SOURCE_ON_DEMAND;
++        avl_insert (global.source_tree, src);
++        avl_delete (global.source_startups, &lookup, NULL);
++        free (result->mount);
++        free (result);
++        thread_rwlock_wlock (&src->lock);
++    }
++    return src;
++}
++
++
++void source_scan ()
++{
++    if (global.source_startups->length == 0)
++        return;
++    DEBUG0 ("loop through source_startups for purging");
++
++    avl_tree_wlock (global.source_tree);
++    avl_node *node = avl_get_first (global.source_startups);
++    time_t now = time(NULL);
++    while (node)
++    {
++        struct startup_source *n = (void*) node->key;
++        node = avl_get_next (node);
++
++        if (n->timeout > now)
++            continue;
++        source_t *s = n->source;
++        DEBUG2 ("startup source %s has %lu listeners", s->mount, s->listeners);
++        if (s->listeners == 0)
++        {
++            struct startup_source lookup;
++            lookup.mount = n->mount;
++            avl_delete (global.source_startups, &lookup, NULL);
++            source_clear_source (s);
++            free (n->mount);
++            free (n);
++        }
++        else
++        {
++            thread_rwlock_wlock (&s->lock);
++            mount_proxy *mountinfo = config_find_mount (config_get_config(), s->mount);
++            if (mountinfo && mountinfo->fallback_mount && global.running == ICE_RUNNING)
++                source_set_fallback (s, mountinfo->fallback_mount);
++            else
++            {
++                s->termination_count = s->listeners;
++                s->flags |= SOURCE_TERMINATING|SOURCE_LISTENERS_SYNC;
++            }
++            config_release_config ();
++            thread_rwlock_unlock (&s->lock);
++        }
++        break;
++    }
++    avl_tree_unlock (global.source_tree);
++}
++
++
++source_t *source_allocate (const char *mount)
++{
++    source_t *src = calloc (1, sizeof(source_t));
++    if (src == NULL)
++        return NULL;
++
++    /* make duplicates for strings or similar */
++    src->mount = strdup (mount);
++    src->listener_send_trigger = 16000;
++    src->format = calloc (1, sizeof(format_plugin_t));
++    src->clients = avl_tree_new (client_compare, NULL);
++    src->intro_file = -1;
++    src->preroll_log_id = -1;
++
++    thread_rwlock_create (&src->lock);
++    thread_spin_create (&src->shrink_lock);
++
++    return src;
++}
++
+ /* Allocate a new source with the stated mountpoint, if one already
+  * exists with that mountpoint in the global source tree then return
+  * NULL.
+@@ -139,7 +301,6 @@ source_t *source_reserve (const char *mount, int flags)
+ 
+     do
+     {
+-        avl_tree_wlock (global.source_tree);
+         src = source_find_mount_raw (mount);
+         if (src)
+         {
+@@ -150,29 +311,17 @@ source_t *source_reserve (const char *mount, int flags)
+             break;
+         }
+ 
+-        src = calloc (1, sizeof(source_t));
++        src = source_allocate (mount);
+         if (src == NULL)
+             break;
+ 
+-        /* make duplicates for strings or similar */
+-        src->mount = strdup (mount);
+-        src->listener_send_trigger = 16000;
+-        src->format = calloc (1, sizeof(format_plugin_t));
+-        src->clients = avl_tree_new (client_compare, NULL);
+-        src->intro_file = -1;
+-        src->preroll_log_id = -1;
+-
+-        thread_rwlock_create (&src->lock);
+-        thread_spin_create (&src->shrink_lock);
+         src->flags |= SOURCE_RESERVED;
+-
+         avl_insert (global.source_tree, src);
+ 
+     } while (0);
+ 
+     if (src)
+         thread_rwlock_wlock (&src->lock);
+-    avl_tree_unlock (global.source_tree);
+     return src;
+ }
+ 
+@@ -708,12 +857,30 @@ static int source_client_read (client_t *client)
+     }
+ 
+     thread_rwlock_wlock (&source->lock);
+-    if (client->connection.discon.time &&
+-            client->connection.discon.time <= client->worker->current_time.tv_sec)
++    //if ((source->flags & SOURCE_ON_DEMAND))
++    //{
++        //DEBUG2 ("listeners %lu, discon %lu", source->listeners, client->connection.discon.time);
++    //}
++    if (client->connection.discon.time)
+     {
+-        source->flags &= ~SOURCE_RUNNING;
+-        INFO1 ("streaming duration expired on %s", source->mount);
++        if (client->connection.discon.time <= client->worker->current_time.tv_sec)
++        {
++            source->flags &= ~SOURCE_RUNNING;
++            INFO1 ("streaming duration expired on %s", source->mount);
++        }
++        if ((source->flags & SOURCE_ON_DEMAND) && source->listeners)
++        {
++            client->connection.discon.time = 0;
++            DEBUG1 ("Removing disconnect on %s", source->mount);
++        }
+     }
++    else
++        if ((source->flags & SOURCE_ON_DEMAND) && source->listeners == 0)
++        {
++            DEBUG1 ("Setting disconnect on %s", source->mount);
++            client->connection.discon.time = client->worker->current_time.tv_sec + 30;
++        }
++
+     if (source_running (source))
+     {
+         if ((source->buffer_count & 3) == 3)
+@@ -1475,9 +1642,9 @@ void source_init (source_t *source)
+     INFO1 ("Source %s initialised", source->mount);
+ 
+     /* on demand relays should of already called this */
+-    if ((source->flags & SOURCE_ON_DEMAND) == 0)
+-        slave_update_mounts();
+-    source->flags &= ~SOURCE_ON_DEMAND;
++    //if ((source->flags & SOURCE_ON_DEMAND) == 0)
++        //slave_update_mounts();
++    //source->flags &= ~SOURCE_ON_DEMAND;
+ }
+ 
+ 
+@@ -2393,6 +2560,16 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
+                     break;
+                 thread_rwlock_unlock (&source->lock);
+             }
++            if (source == NULL && minfo)
++            {
++                source_t *src = source_startup_pending (mount, minfo);
++                if (src)
++                {
++                    DEBUG1 ("Adding listener to pending source %s", mount);
++                    source = src;
++                    break;
++                }
++            }
+             avl_tree_unlock (global.source_tree);
+             if (minfo && minfo->limit_rate)
+                 rate = minfo->limit_rate/8;
+@@ -2748,7 +2925,11 @@ int source_startup (client_t *client, const char *uri)
+ 
+     config_release_config();
+ 
+-    source = source_reserve (uri, (client->flags & CLIENT_HIJACKER) ? 1 : 0);
++    avl_tree_wlock (global.source_tree);
++    source = retrieve_startup_pending (uri);
++    if (source == NULL)
++        source = source_reserve (uri, (client->flags & CLIENT_HIJACKER) ? 1 : 0);
++    avl_tree_unlock (global.source_tree);
+     if (source)
+     {
+         if ((client->flags & CLIENT_HIJACKER) && source_running (source))
+diff --git a/src/source.h b/src/source.h
+index 876f588..b6dabf9 100644
+--- a/src/source.h
++++ b/src/source.h
+@@ -105,7 +105,19 @@ typedef struct source_tag
+ #define SOURCE_RESERVED             (1<<7)
+ 
+ #define source_available(x)     (((x)->flags & (SOURCE_RUNNING|SOURCE_ON_DEMAND)) && ((x)->flags & SOURCE_LISTENERS_SYNC) == 0)
+-#define source_running(x)       ((x)->flags & SOURCE_RUNNING)
++#define source_running(x)       (((x)->flags & (SOURCE_TERMINATING|SOURCE_RUNNING)) == SOURCE_RUNNING)
++
++struct startup_source
++{
++    char *mount;
++    source_t *source;
++    time_t  timeout;
++    unsigned flags;
++};
++
++source_t *source_startup_pending (const char *mount, struct _mount_proxy *minfo);
++int source_startup_compare (void *arg, void *a, void *b);
++void source_scan (void);
+ 
+ source_t *source_reserve (const char *mount, int ret_exist);
+ void *source_client_thread (void *arg);
