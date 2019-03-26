@@ -1,8 +1,8 @@
 diff --git a/src/cfgfile.c b/src/cfgfile.c
-index 791e1a1..a3828c9 100644
+index e3bfc64..1d5b714 100644
 --- a/src/cfgfile.c
 +++ b/src/cfgfile.c
-@@ -1026,6 +1026,7 @@ static int _parse_mount (xmlNodePtr node, void *arg)
+@@ -1028,6 +1028,7 @@ static int _parse_mount (xmlNodePtr node, void *arg)
          { "authentication",     auth_get_authenticator, &mount->auth },
          { "on-connect",         config_get_str,     &mount->on_connect },
          { "on-disconnect",      config_get_str,     &mount->on_disconnect },
@@ -11,7 +11,7 @@ index 791e1a1..a3828c9 100644
                                  config_get_int,     &mount->max_stream_duration },
          { "max-listener-duration",
 diff --git a/src/cfgfile.h b/src/cfgfile.h
-index a389382..fdefad7 100644
+index abe201a..3b0d97c 100644
 --- a/src/cfgfile.h
 +++ b/src/cfgfile.h
 @@ -151,6 +151,7 @@ typedef struct _mount_proxy {
@@ -84,7 +84,7 @@ index 6c44f6d..650f1f4 100644
          /* allow for terminating icecast if no streams running */
          if (inactivity_timer)
 diff --git a/src/source.c b/src/source.c
-index c4caa5d..b45d65e 100644
+index c79bb53..644c57f 100644
 --- a/src/source.c
 +++ b/src/source.c
 @@ -65,7 +65,8 @@
@@ -339,7 +339,7 @@ index c4caa5d..b45d65e 100644
      if (source_running (source))
      {
          if ((source->buffer_count & 3) == 3)
-@@ -1475,9 +1642,9 @@ void source_init (source_t *source)
+@@ -1479,9 +1646,9 @@ void source_init (source_t *source)
      INFO1 ("Source %s initialised", source->mount);
  
      /* on demand relays should of already called this */
@@ -352,7 +352,7 @@ index c4caa5d..b45d65e 100644
  }
  
  
-@@ -2393,6 +2560,16 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
+@@ -2396,6 +2563,16 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
                      break;
                  thread_rwlock_unlock (&source->lock);
              }
@@ -369,7 +369,7 @@ index c4caa5d..b45d65e 100644
              avl_tree_unlock (global.source_tree);
              if (minfo && minfo->limit_rate)
                  rate = minfo->limit_rate/8;
-@@ -2748,7 +2925,11 @@ int source_startup (client_t *client, const char *uri)
+@@ -2749,7 +2926,11 @@ int source_startup (client_t *client, const char *uri)
  
      config_release_config();
  
