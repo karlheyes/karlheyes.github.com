@@ -84,7 +84,7 @@ index 6c44f6d..650f1f4 100644
          /* allow for terminating icecast if no streams running */
          if (inactivity_timer)
 diff --git a/src/source.c b/src/source.c
-index c79bb53..644c57f 100644
+index c79bb53..294a501 100644
 --- a/src/source.c
 +++ b/src/source.c
 @@ -65,7 +65,8 @@
@@ -97,7 +97,7 @@ index c79bb53..644c57f 100644
  static void _parse_audio_info (source_t *source, const char *s);
  static void source_client_release (client_t *client);
  static int  source_listener_release (source_t *source, client_t *client);
-@@ -129,6 +130,167 @@ struct _client_functions source_client_http_ops =
+@@ -129,6 +130,180 @@ struct _client_functions source_client_http_ops =
  };
  
  
@@ -111,44 +111,57 @@ index c79bb53..644c57f 100644
 +}
 +
 +
-+void run_process (const char *mount, mount_proxy *minfo)
++pid_t run_process (const char *mount, mount_proxy *minfo)
 +{
 +    unsigned int len;
 +    char command [4096];
 +    len = sizeof command;
 +
 +    if (util_expand_pattern (mount, minfo->startup_source, command, &len) != 0)
-+        return;
++        return 0;
 +    DEBUG2 ("Starting process for %s : %s", mount, command);
-+    pid_t pid, external_pid;
++    pid_t external_pid;
 +
 +    /* do a fork twice so that the command has init as parent */
 +    external_pid = fork();
 +    switch (external_pid)
 +    {
 +        case 0:
++        #if 0
 +            switch (pid = fork ())
 +            {
 +                case -1:
 +                    ERROR2 ("Unable to fork %s (%s)", command, strerror (errno));
 +                    break;
 +                case 0:  /* child */
++                #endif
 +                    close (0);
 +                    close (1);
 +                    close (2);
++                    sigset_t x;
++                    sigemptyset (&x);
++                    sigaddset (&x, SIGHUP);
++                    sigaddset (&x, SIGINT);
++                    sigaddset (&x, SIGTERM);
++                    sigaddset (&x, SIGCHLD);
++                    sigprocmask (SIG_UNBLOCK, &x, NULL);
 +                    execl ("/bin/sh", "sh", "-c", command, (char *)NULL);
 +                    exit(1);
++                    #if 0
 +                default: /* parent */
 +                    break;
 +            }
 +            exit (0);
++            #endif
 +        case -1:
 +            ERROR1 ("Unable to fork %s", strerror (errno));
++            external_pid = 0;
 +            break;
 +        default: /* parent */
-+            waitpid (external_pid, NULL, 0);
++            //waitpid (external_pid, NULL, 0);
 +            break;
 +    }
++    return external_pid;
 +}
 +
 +
@@ -166,7 +179,7 @@ index c79bb53..644c57f 100644
 +        result->timeout = time (NULL) + 10;     // should have a source connection within 10 seconds
 +        result->source = source_allocate (mount);
 +        avl_insert (global.source_startups, result);
-+        run_process (mount, minfo);
++        result->source->source_pid = run_process (mount, minfo);
 +    }
 +    thread_rwlock_wlock (&result->source->lock);
 +    return result->source;
@@ -265,7 +278,7 @@ index c79bb53..644c57f 100644
  /* Allocate a new source with the stated mountpoint, if one already
   * exists with that mountpoint in the global source tree then return
   * NULL.
-@@ -139,7 +301,6 @@ source_t *source_reserve (const char *mount, int flags)
+@@ -139,7 +314,6 @@ source_t *source_reserve (const char *mount, int flags)
  
      do
      {
@@ -273,7 +286,7 @@ index c79bb53..644c57f 100644
          src = source_find_mount_raw (mount);
          if (src)
          {
-@@ -150,29 +311,17 @@ source_t *source_reserve (const char *mount, int flags)
+@@ -150,29 +324,17 @@ source_t *source_reserve (const char *mount, int flags)
              break;
          }
  
@@ -304,7 +317,7 @@ index c79bb53..644c57f 100644
      return src;
  }
  
-@@ -708,12 +857,30 @@ static int source_client_read (client_t *client)
+@@ -708,12 +870,30 @@ static int source_client_read (client_t *client)
      }
  
      thread_rwlock_wlock (&source->lock);
@@ -339,7 +352,7 @@ index c79bb53..644c57f 100644
      if (source_running (source))
      {
          if ((source->buffer_count & 3) == 3)
-@@ -1479,9 +1646,9 @@ void source_init (source_t *source)
+@@ -1479,9 +1659,9 @@ void source_init (source_t *source)
      INFO1 ("Source %s initialised", source->mount);
  
      /* on demand relays should of already called this */
@@ -352,7 +365,30 @@ index c79bb53..644c57f 100644
  }
  
  
-@@ -2396,6 +2563,16 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
+@@ -1674,6 +1854,13 @@ void source_shutdown (source_t *source, int with_fallback)
+             if (mountinfo->on_disconnect)
+                 source_run_script (mountinfo->on_disconnect, source->mount);
+             auth_stream_end (mountinfo, source);
++            if (mountinfo->startup_source && source->source_pid)
++            {
++                INFO2 ("Sending TERM to %ld on %s", (long)source->source_pid, source->mount);
++                kill (source->source_pid, SIGTERM);
++                waitpid (source->source_pid, NULL, 0);
++                source->source_pid = 0;
++            }
+         }
+     }
+     if (mountinfo && with_fallback && global.running == ICE_RUNNING)
+@@ -2046,6 +2233,8 @@ void source_update_settings (ice_config_t *config, source_t *source, mount_proxy
+             DEBUG1 ("connect script \"%s\"", mountinfo->on_connect);
+         if (mountinfo->on_disconnect)
+             DEBUG1 ("disconnect script \"%s\"", mountinfo->on_disconnect);
++        if (mountinfo->startup_source)
++            DEBUG1 ("startup source \"%s\"", mountinfo->startup_source);
+         if (mountinfo->fallback_when_full)
+             DEBUG1 ("fallback_when_full to %u", mountinfo->fallback_when_full);
+         DEBUG1 ("max listeners to %d", mountinfo->max_listeners);
+@@ -2396,6 +2585,16 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
                      break;
                  thread_rwlock_unlock (&source->lock);
              }
@@ -369,7 +405,16 @@ index c79bb53..644c57f 100644
              avl_tree_unlock (global.source_tree);
              if (minfo && minfo->limit_rate)
                  rate = minfo->limit_rate/8;
-@@ -2749,7 +2926,11 @@ int source_startup (client_t *client, const char *uri)
+@@ -2483,7 +2682,7 @@ int source_add_listener (const char *mount, mount_proxy *mountinfo, client_t *cl
+                     client->respcode = 0;
+                     client->pos = 0;
+                 }
+-                stats_lock (source->stats, source->mount);
++                source->stats = stats_lock (source->stats, source->mount);
+                 stats_set_inc (source->stats, "listener_connections");
+                 stats_release (source->stats);
+             }
+@@ -2749,7 +2948,11 @@ int source_startup (client_t *client, const char *uri)
  
      config_release_config();
  
@@ -383,10 +428,18 @@ index c79bb53..644c57f 100644
      {
          if ((client->flags & CLIENT_HIJACKER) && source_running (source))
 diff --git a/src/source.h b/src/source.h
-index 876f588..b6dabf9 100644
+index 876f588..315834b 100644
 --- a/src/source.h
 +++ b/src/source.h
-@@ -105,7 +105,19 @@ typedef struct source_tag
+@@ -52,6 +52,7 @@ typedef struct source_tag
+     int incoming_adj;
+     long limit_rate;
+     time_t wait_time;
++    pid_t source_pid; // if we start it
+ 
+     long termination_count;
+     unsigned long peak_listeners;
+@@ -105,7 +106,19 @@ typedef struct source_tag
  #define SOURCE_RESERVED             (1<<7)
  
  #define source_available(x)     (((x)->flags & (SOURCE_RUNNING|SOURCE_ON_DEMAND)) && ((x)->flags & SOURCE_LISTENERS_SYNC) == 0)
