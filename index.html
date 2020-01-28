@@ -35,6 +35,18 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh13.tar.gz">2.4.0-kh13</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh13_win32_setup.exe/download">2.4.0-kh13 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh13_win64_setup.exe/download">2.4.0-kh13 (win64) </a> <br/>
+    <p>28/1/2020</p>
+    <ul>
+    <li>Fix an annoying race case. memory corruption in certain cases that are hard to trigger normally but typically involes a listener disconnecting in certain conditions.
+    <li>Tightened up use-after-free cases with regard to the queue pruning.
+    <li>leak fixes with intro via auth.
+    <li>Allow seconds to be specified in burst and queue size fields. Just specify the number followed by s eg 30s  or 5s. Eventually we could make this the default so that is can apply to various bitrates.
+    <li>small minor cleanups across the board.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh12.tar.gz">2.4.0-kh12</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh12_win32_setup.exe/download">2.4.0-kh12 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh12_win64_setup.exe/download">2.4.0-kh12 (win64) </a> <br/>
