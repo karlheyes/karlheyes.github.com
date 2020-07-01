@@ -35,6 +35,49 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh15.tar.gz">2.4.0-kh15</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh15_win32_setup.exe/download">2.4.0-kh15 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh15_win64_setup.exe/download">2.4.0-kh15 (win64) </a> <br/>
+    <p>1/7/2020</p>
+    <ul>
+    <li>Locking updates. For most, it will be no different but some platforms can be affected
+    <li>Keep consistency on the global listener count. Could of shown as very large number.
+    <li>Fix issue with fallback override of listeners. listeners being dropped
+    <li>Fix broken parameter to on-[dis]connect script on previous release.
+    <li>Small update for CORS handling.
+    <li>Fix YP updating.  Long standing error flagged up on directory changes.
+    <li>Update for listeners moving between workers for load balancing.
+    <li>Small update for the FLV-aac wrapping in previous release.
+    <li>Fix up range request bug.
+    <li>Fix various log related issues.
+    <li>Some internal code cleanup
+    </ul>
+
+    <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh14.tar.gz">2.4.0-kh14</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh14_win32_setup.exe/download">2.4.0-kh14 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh14_win64_setup.exe/download">2.4.0-kh14 (win64) </a> <br/>
+    <p>26/4/2020</p>
+    <ul>
+    <li>Allow for using secs (eg 5s) in queue/min-queue/burst measures.
+    <li>Allow multiple icy sources on same port. Just embed in password a mountpoint:pass. The
+    shoutcast-mount tag still creates the +1 port and sets a default mountpoint but source
+    can override this.
+    <li>Fix log issue which could cause a deadlock if on-[dis]connect or auth cmd are used.
+    <li>Allow configure to accept ICY_CHARSET to set alternate in build.  The default ICY
+    metadata is assumed to be UTF8, but some sites still have issues with setting tags or
+    parameters, so allow a different default if they need it.
+    <li>Regression on FLV wrapped aac metadata fixed.
+    <li>Crash/corruption fix if using stream auth and metadata updates via admin.
+    <li>Fix for glibc rwlock priority
+    <li>Added the icy-metadata in headers allowed with CORS
+    <li>Rework XFF to be earlier, useful in cases where banned IPs apply.
+    <li>Allow wildcards in XFF
+    <li>Drop the BSD NOPUSH setting for now. Have seen poor performance because of it in
+    certain cases
+    <li>Openssl API cleanups. eg API differences between versions.
+    <li>various small fixes, build and operational.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh13.tar.gz">2.4.0-kh13</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh13_win32_setup.exe/download">2.4.0-kh13 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh13_win64_setup.exe/download">2.4.0-kh13 (win64) </a> <br/>
