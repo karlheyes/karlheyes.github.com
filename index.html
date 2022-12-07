@@ -35,6 +35,24 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh16.tar.gz">2.4.0-kh16</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh16_win32_setup.exe/download">2.4.0-kh16 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh16_win64_setup.exe/download">2.4.0-kh16 (win64) </a> <br/>
+    <p>7/12/2022</p>
+    <ul>
+    <li>Locking updates. Mostly for the config, mount lookup and client processing.
+    <li>Add redirect_limit to auth URL options, default 1 but 0-10 allowed.
+    <li>If URL Post is too large then avoid the backend request.
+    <li>Fix up the slow SSL response on web requests.
+    <li>The id flag on killclient command did not handle very large numbers
+    <li>Drop the source limit check on relay startup. Did not make much sense.
+    <li>Fix some keepalive client issues.
+    <li>log reopening fix
+    <li>Ogg FLaC header fix
+    <li>Various internal code changes.
+    <li>update auto* build setup
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/icecast-2.4.0-kh15.tar.gz">2.4.0-kh15</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh15_win32_setup.exe/download">2.4.0-kh15 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh15_win64_setup.exe/download">2.4.0-kh15 (win64) </a> <br/>
