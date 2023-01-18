@@ -35,6 +35,58 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh17.tar.gz">2.4.0-kh17</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh17_win32_setup.exe/download">2.4.0-kh17 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh17_win64_setup.exe/download">2.4.0-kh17 (win64) </a> <br/>
+    <p>18/1/2023</p>
+    <ul>
+    <li>HTTP handling update. A lot of this is internal but the mechanism allows for
+    updating http headers from the XML using the http-headers block at the global
+    level or per mount point.  The same sort of block can be used within the relay
+    for specifying any headers to a relay.
+    <li> XML parsing updates. This allows for simple tags to be embedded into the parent
+    tag.  examples include<br/>
+<pre>
+    &lt;listen-socket port="8000" /&gt;
+    &lt;mount mount-name="/stream"&gt;
+    ...
+    &lt;/mount&gt;
+    &lt;relay local-mount="/stream" on-demand="true"&gt;
+      &lt;host server="master1" port="8000" mount="/feed-1" /&gt;
+      &lt;host server="master2" port="9000" mount="/feed-2" /&gt;
+    &lt;/relay&gt;
+    </pre>
+    <li>Relay hijack capability. Two possible use cases
+    <ul>
+    <li>In the multiple host relay situation, every relay-delay seconds, the previously
+    failed but higher priority hosts are re-tried and if one works then switches in
+    to provide the feed for the stream. listeners are not moved.
+
+    <li>A source client can override a relay on the same mount point without moving
+    listeners.  This effectively shuts down the pulling part of the relay but stays
+    around until the source client exits, at which point the relay restarts.  This can
+    be seen as another type of fallback, one without the issue of shared fallback mounts
+    causing listeners to end up on unexpected mount points. As the listeners stay in one
+    place then things like stats are more consistent.
+    </ul><br />
+    <li>SSL can be used on relay feed. Use boolean tag ssl or tls on the above host. The
+    relay can redirect to https to achieve the same thing.
+
+    <li>priority tag on relay to allow for order host startup different to the order in
+    the XML. 1 is highest order, unspecified implies ordered per XML.
+
+    <li>add ignore case for user agent matching.
+
+    <li>priority tag on mount to allow for search order when you can match multiple mount
+    blocks (due to wildcard).
+
+    <li>Small update to CORS handling, interaction with http work.
+    <li>fnmatch (wildcard handling was broken in windows now fixed) and can use extended
+    settings like @ etc
+    <li>Minor web page update
+    <li>Document updates.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh16.tar.gz">2.4.0-kh16</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh16_win32_setup.exe/download">2.4.0-kh16 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh16_win64_setup.exe/download">2.4.0-kh16 (win64) </a> <br/>
