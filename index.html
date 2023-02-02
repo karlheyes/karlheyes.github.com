@@ -35,10 +35,34 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh18.tar.gz">2.4.0-kh18</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh18_win32_setup.exe/download">2.4.0-kh18 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh18_win64_setup.exe/download">2.4.0-kh18 (win64) </a> <br/>
+    <p>2/2/2023</p>
+    <ul>
+    <li>Extend http headers work from previous release.
+    Can now be used to create POST data. This improves code readability and also allows for more flexability.
+    Make global http headers work as expected.
+    <li>Switchover updates.
+    Cleaner handling when switching over the client for a relay or source.
+    Interacts with inactive on-demand relays.
+    <li>Introduce the linger-on mount setting. On stream exit, the stream goes into a
+    state where it stays around running but no feed comes in. This allows for a
+    delayed termination if you have relays or sources that drop but reconnect
+    but you do not want to keep dropping to fallbacks. During this state, you can
+    connect another source so can be used as a switch over between sources.
+    <li>Various libcurl interaction updates. tigher control on callback handling
+    Handle server shutdown interrupting libcurl requests quicker.
+    <li>Trap for HTTP request on shoutcast port and treat it as such.
+    <li>Various code cleanups that have been reported.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh17.tar.gz">2.4.0-kh17</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh17_win32_setup.exe/download">2.4.0-kh17 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh17_win64_setup.exe/download">2.4.0-kh17 (win64) </a> <br/>
     <p>18/1/2023</p>
+    <p>Report on the global http-headers causing a crash, now fixed in master, will update these build soon but you can
+    use these if you do not intend to use global http-headers.</p>
     <ul>
     <li>HTTP handling update. A lot of this is internal but the mechanism allows for
     updating http headers from the XML using the http-headers block at the global
