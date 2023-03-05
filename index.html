@@ -35,6 +35,29 @@
     Latest KH development work is now up on github <a href="https://github.com/karlheyes/icecast-kh">Here</a>
     <br/><br/>
 
+    <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh19.tar.gz">2.4.0-kh19</a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh19_win32_setup.exe/download">2.4.0-kh19 (win32) </a> <br/>
+    <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh19_win64_setup.exe/download">2.4.0-kh19 (win64) </a> <br/>
+    <p>5/3/2023</p>
+    <ul>
+    <li>Another update to xml parsing. Allows for cleaner and more flexible handling of
+    parameters and tags.
+    Added fallback to mirror fallback-mount, so that it reads better in certain cases
+    eg &lt;fallback mount="/backup" rate="128k"/&gt;. The other layouts are also handled.
+    Empty tags are now ignored, seen with some with intro tags
+    original shoutcast port compatability settings handled better.
+    <li>Optional feature, set hijack to true on mount to allow a source to kick off the
+    existing stream without touching listeners. This is primarily for replacing a
+    relay stream as a replacment for fallback handling as it keeps listeners on the
+    same mountpoint. While the feature will stay, the exact methos to enable is still
+    subject for change but setting this on the mount block is reasonable.
+    <li>fix relay intialization failure case.
+    <li>relay internal state fix on reload. restart on certain changes.
+    <li>range header case fixed. playback issue in browsers
+    <li>various code cleanups, possible lockup issues resolved, crash cases, work done at shutdown etc.
+    <li>reduce some excessive logging in certain cases.
+    </ul>
+
     <a href="https://github.com/karlheyes/icecast-kh/archive/refs/tags/icecast-2.4.0-kh18.tar.gz">2.4.0-kh18</a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh18_win32_setup.exe/download">2.4.0-kh18 (win32) </a> <br/>
     <a href="https://sourceforge.net/projects/icecastkh/files/icecast-2.4.0-kh18_win64_setup.exe/download">2.4.0-kh18 (win64) </a> <br/>
